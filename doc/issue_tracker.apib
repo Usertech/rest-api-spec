@@ -1,0 +1,374 @@
+FORMAT: 1A
+
+# Issue tracker
+
+Issue tracker is siple example application for defining universal REST API of Is-core and Seed.
+
+## Entry point [/api/]
+
+### List all entities [GET]
+
++ Response 200 (application/json)
+
+        [
+            {
+                "name": "user",
+                "verbose_name": "User",
+                "verbose_name_plural": "Users",
+                "links": {
+                    "data": "/api/user/",
+                    "meta": "/api/user/meta/",
+                    "doc": "/api/user/doc/"
+                }
+            },
+            {
+                "name": "issue",
+                "verbose_name": "Issue"
+                "verbose_name_plural": "Issues",
+                "links": {
+                    "data": "/api/issue/"
+                    "meta": "/api/issue/meta/",
+                    "doc": "/api/issue/doc/"
+                }
+            },
+            {
+                "name": "project",
+                "verbose_name": "Project"
+                "verbose_name_plural": "Projects",
+                "links": {
+                    "/api/project/",
+                    "meta": "/api/issue/meta/",
+                    "doc": "/api/issue/doc/"
+                }
+            }
+        ]
+
+
+## Project [/api/project/{?_filter,_word_separator,_base,_offset,_meta}]
+
++ Parameters
+    + _filter - filter string
+    + _word_separator - set type separator (CamelCase, snake_case)
+    + _base - number of returned entities
+    + _offset - number of first returned entity
+    + _serialization_format - type of serialization (raw, verbose, both)
+    + _accept - content type of returned data
+    + _meta - returns data with metamodel
+
+### List project entities [GET]
+
+<!-- TODO maybe allow return data with metamodel together -->
+
++ Request
+
+<!-- custom headers must start with X (RFC 2616) -->
+
+    + Headers
+        X-Offset: 0
+        X-Base: 20
+        X-Serialization-Format: raw
+        X-Fields: id,title,leader,_links
+        X-Order: id
+
++ Response 200 (application/json)
+
+    + Headers
+        X-Total: 2
+        X-Fields-Options: id,title,leader(id,username,first_name,last_name,_links),issues
+        X-Serialization-Format-Options: raw,verbose,both
+        X-Content-types: application/json,application/vnd.ms-excel,text/xml,application/pdf,text/csv
+
+        [
+            {
+                "title": "project1 title",
+                "leader": {
+                    "pk": 1,
+                    "username": "leader1"
+                },
+                "_links": [
+                    {
+                        "name": "list",
+                        "url": "/api/project/",
+                        "methods": ["POST", "GET", "PUT"]
+                    },
+                    {
+                        "name": "detail",
+                        "url": "/api/project/1/",
+                        "methods": ["GET", "PUT"]
+                    }
+                ]
+            },
+            {
+                "title": "project2 title",
+                "leader": {
+                    "id": 2,
+                    "username": "leader2"
+                },
+                "_links": [
+                    {
+                        "name": "list",
+                        "url": "/api/project/",
+                        "methods": ["POST", "GET", "PUT"]
+                    },
+                    {
+                        "name": "detail",
+                        "url": "/api/project/2/",
+                        "methods": ["GET", "PUT"]
+                    }
+                ]
+            }
+        ]
+
+### Create new project [POST]
+
++ Request (application/json)
+
+        {
+            "title": "project3 title",
+            "leader": {
+                "id": 3
+            }
+
+
++ Response 201 (application/json)
+
+        {
+            "id": 3
+            "title": "project3 title",
+            "leader": {
+                "id": 3
+            }
+        }
+
+### Bulk change [PUT]
+
++ Response 200 (application/json)
+
+        [
+            {
+                "title": "project4 title",
+                "leader": {
+                    "id": 1,
+                    "username": "leader1"
+                },
+                "_links": [
+                    {
+                        "name": "list",
+                        "url": "/api/project/",
+                        "methods": ["POST", "GET", "PUT"]
+                    },
+                    {
+                        "name": "detail",
+                        "url": "/api/project/1/",
+                        "methods": ["GET", "PUT"]
+                    }
+                ]
+            },
+            {
+                "title": "project4 title",
+                "leader": {
+                    "id": 2,
+                    "username": "leader2"
+                },
+                "_links": [
+                    {
+                        "name": "list",
+                        "url": "/api/project/",
+                        "methods": ["POST", "GET", "PUT"]
+                    },
+                    {
+                        "name": "detail",
+                        "url": "/api/project/2/",
+                        "methods": ["GET", "PUT"]
+                    }
+                ]
+            }
+        ]
+
+## Project [/api/project/{project_id}/{?_word_separator,_meta}]
+
++ Parameters
+    + project_id (number) - ID of the Project in the form of an integer
+    + _word_separator - set type separator (CamelCase, snake_case)
+    + _meta - returns data with metamodel
+
+### View a Project Detail [GET]
+
++ Response 200 (application/json)
+
+        {
+            "title": "project1 title",
+            "leader": {
+                "id": 1,
+                "username": "leader1"
+            },
+            "_links": [
+                {
+                    "name": "list",
+                    "url": "/api/project/",
+                    "methods": ["POST", "GET", "PUT"]
+                },
+                {
+                    "name": "detail",
+                    "url": "/api/project/1/",
+                    "methods": ["GET", "PUT"]
+                }
+            ]
+        }
+
+### Update [PUT]
+
++ Request (application/json)
+
+       {
+            "title": "project4 title",
+       }
+
++ Response 200 (application/json)
+
+       {
+            "id": 3,
+            "title": "project4 title",
+            "leader": {
+                "id": 3
+            },
+            "_links": [
+                {
+                    "name": "list",
+                    "url": "/api/project/",
+                    "methods": ["POST", "GET", "PUT"]
+                },
+                {
+                    "name": "detail",
+                    "url": "/api/project/3/",
+                    "methods": ["GET", "PUT"]
+                }
+            ]
+       }
+
+### Delete [DELETE]
+
++ Response 204
+
+
+## Project metamodel [/api/project/meta/]
+
+### Print metamodel [GET]
+
+It is returned only methods allowed to current user.
+
++ Response 200 (application/json)
+
+        {
+            "verbose_name": "Project",
+            "verbose_name_plural": "Projects",
+            "fields": [
+                {
+                    "name": "title",
+                    "type": "varchar",
+                    "verbose_name": "title",
+                    "sortable": true,
+                    "filterable": true,
+                    "null": false,
+                    "blank": false,
+                    "validators": [
+                        {
+                            "type": "max_length",
+                            "max_length": 100,
+                            "script": "value.length <= 100"
+                        }
+                    ]
+                },
+                {
+                    "name": "leader",
+                    "type": "one_to_one",
+                    "verbose_name": "leader",
+                    "sortable": true,
+                    "filterable": true,
+                    "null": false,
+                    "blank": false,
+                },
+                {
+                    "name": "issues",
+                    "type": "one_to_many",
+                    "verbose_name": "issues",
+                    "sortable": true,
+                    "filterable": true,
+                    "blank": true,
+                }
+            ],
+            "methods": {
+                "post": {
+                   "description": "create entity",
+                   "fields": ['title', 'leader']
+                }
+                "get": {
+                   "description": "read entities",
+                   "fields": ['title', 'leader', 'issues'],
+                   "default_field_names": ["title"]
+                },
+                "put": {
+                   "description": "bulk update entities, filter required",
+                   "fields": ['title']
+                }
+            }
+        }
+
+## Project entity metamodel [/api/project/meta/{project_id}/]
+
+### Print concrete entity metamodel [GET]
+
++ Response 200 (application/json)
+
+        {
+            "verbose_name": "Project",
+            "verbose_name_plural": "Projects",
+            "fields": [
+                {
+                    "name": "title",
+                    "type": "varchar",
+                    "verbose_name": "title",
+                    "sortable": true,
+                    "filterable": true,
+                    "null": false,
+                    "blank": false,
+                    "validators": [
+                        {
+                            "type": "max_length",
+                            "max_length": 100,
+                            "script": "value.length <= 100"
+                        }
+                    ]
+                },
+                {
+                    "name": "leader",
+                    "type": "one_to_one",
+                    "verbose_name": "leader",
+                    "sortable": true,
+                    "filterable": true,
+                    "null": false,
+                    "blank": false,
+                },
+                {
+                    "name": "issues",
+                    "type": "one_to_many",
+                    "verbose_name": "issues",
+                    "sortable": true,
+                    "filterable": true,
+                    "blank": true,
+                }
+            ],
+            "methods": {
+                "get": {
+                   "description": "read entity",
+                   "has_permission": true,
+                   "fields": ['title', 'leader', 'issues'],
+                   "default_field_names": ["title"]
+                },
+                "put": {
+                   "description": "update entity",
+                   "has_permission": true,
+                   "fields": ['title', 'leader']
+                }
+            }
+        }
